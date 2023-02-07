@@ -1,4 +1,4 @@
 yfinance
 matplotlib
-sklearn
+scikit-learn
 numpy
