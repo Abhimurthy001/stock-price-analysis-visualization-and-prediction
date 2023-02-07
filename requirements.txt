@@ -1,0 +1,4 @@
+yfinance
+matplotlib
+sklearn
+numpy
