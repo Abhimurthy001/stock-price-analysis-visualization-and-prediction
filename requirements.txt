@@ -2,3 +2,4 @@ yfinance
 matplotlib
 scikit-learn
 numpy
+pandas-datareader
