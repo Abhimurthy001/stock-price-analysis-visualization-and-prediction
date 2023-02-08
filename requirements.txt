@@ -4,6 +4,4 @@ scikit-learn
 numpy
 pandas-datareader
 plotly
-streamlit
-tensorfow
 math
