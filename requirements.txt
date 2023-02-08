@@ -5,4 +5,4 @@ numpy
 pandas-datareader
 plotly
 streamlit
-fbprophet 
+prophet 
