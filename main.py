@@ -10,7 +10,7 @@ from plotly import graph_objs as go
 START = "2002-01-23"
 TODAY = date.today().strftime("%Y-%m-%d")
 
-st.title('Stock Forecast App')
+st.title('Stock Price Prediction App')
 
 stocks = ('HDFCBANK.NS', 'RELIANCE.NS', 'ICICIBANK.NS', 'TCS.NS','INFY.NS','SBIN.NS','ADANIPOWER.NS','ADANIPORTS.NS')
 selected_stock = st.selectbox('Select dataset for prediction', stocks)
