@@ -4,3 +4,5 @@ scikit-learn
 numpy
 pandas-datareader
 plotly
+streamlit
+fbprophet 
