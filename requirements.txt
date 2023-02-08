@@ -1,6 +1,4 @@
-numpy
-matplotlib
-scikit-learn
-tensorflow
-pandas
-pandas-datareader
+streamlit
+fbprophet
+yfinance
+plotly
