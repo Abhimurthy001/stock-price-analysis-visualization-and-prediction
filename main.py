@@ -1,122 +1,118 @@
-import math
-from tensorflow.keras.layers import LSTM
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.models import Sequential
-from sklearn.preprocessing import MinMaxScaler
+# load library
 import streamlit as st
-from datetime import date
-import pandas as pd
 import numpy as np
+import pandas as pd
+from pandas_datareader import data as pdr
+
+import math
+from sklearn.model_selection import train_test_split
+from sklearn import preprocessing
+from sklearn.linear_model import LinearRegression
+import matplotlib.pyplot as plt
+from matplotlib import style
+import datetime as dt
 import yfinance as yf
-import plotly.graph_objects as go
-#import matplotlib.pyplot as plt
-#plt.style.use('fivethirtyeight')
+import datetime
 
+# print title of web app
+st.title("Stock price analysis and prediction")
+st.markdown("> Its a project on analysing, visualizing and predicting stock price.")
+st.markdown("> It is a web application build on streamlit")
 
-st.title('Stock Forecast App')
-
-stocks = ("BTC-USD","LBLOCK-USD", "RELIANCE.NS", "BHARTIARTL.NS", "ICICIBANK.NS", "TATASTEEL.NS", "ZEEL.NS")
-selected_stock = st.selectbox("Select Stocks for prediction", stocks)
-
-
-
-def load_data(ticker):
-    data = yf.download(ticker)
-    data.reset_index(inplace=True)
-    return data
-
-
+# Create a text element and let the reader know the data is loading.
 data_load_state = st.text('Loading data...')
-df_import = load_data(selected_stock)
-data_load_state.text('Loading data... done!')
 
-st.subheader('Last Five Days')
-st.write(df_import.tail())
+# Load data from yahoo finance.
+start=dt.date(2010,1,1)
+end=dt.date.today()
+data=pdr.get_data_yahoo("SBIN.NS", start, end)
 
+#fill nan vale with next value within columns
+data.fillna(method="ffill",inplace=True)
 
-def plot_raw_data():
-    fig = go.Figure()
-    # fig.add_trace(go.Scatter(x=data.Date, y=data['Open'], name="stock_open",line_color='deepskyblue'))
-    fig.add_trace(go.Scatter(
-        x=df_import.Date, y=df_import['Close'], name="stock_close", line_color='deepskyblue'))
-    fig.layout.update(
-        title_text='Time Series data with Rangeslider', xaxis_rangeslider_visible=True)
-    st.plotly_chart(fig)
-    return fig
+# Notify the reader that the data was successfully loaded.
+data_load_state.text('Loading data...done!')
 
+# create checkbox
+if st.checkbox('Show raw data'):
+    st.subheader('Raw data')
+    st.write(data)
+ 
+# show the description of data
+st.subheader('Detail description about Datasets:-')
+descrb=data.describe()
+st.write(descrb)
 
-plot_raw_data()
+#create new columns like year, month, day
+data["Year"]=data.index.year
+data["Month"]=data.index.month
+data["Weekday"]=data.index.day_name()
 
-# Model
+# dislay graph of open and close column
+st.subheader('Graph of Close & Open:-')
+st.line_chart(data[["Open","Close"]])
 
-# imports
+# display plot of Adj Close column in datasets
+st.subheader('Graph of Adjacent Close:-')
+st.line_chart(data['Adj Close'])
 
-data_load_state = st.text('Loading Model...')
+# display plot of volume column in datasets
+st.subheader('Graph of Volume:-')
+st.line_chart(data['Volume'])
 
-data_main = df_import.filter(['Close'])
-current_data = np.array(data_main).reshape(-1, 1).tolist()
+# create new cloumn for data analysis.
+data['HL_PCT'] = (data['High'] - data['Low']) / data['Close'] * 100.0
+data['PCT_change'] = (data['Close'] - data['Open']) / data['Open'] * 100.0
+data = data[['Adj Close', 'HL_PCT', 'PCT_change', 'Volume']]
 
-n = 60
-data_main.drop(data_main.tail(n).index, inplace = True)
+# display the new dataset after modificaton
+st.subheader('Newly format DataSet:-')
+st.dataframe(data.tail(500))
 
-df = np.array(data_main).reshape(-1, 1)
-scaler = MinMaxScaler(feature_range=(0, 1))
-scaled_df = scaler.fit_transform(np.array(df).reshape(-1, 1))
-train_data = scaled_df[0: , :]
+forecast_col = 'Adj Close'
+forecast_out = int(math.ceil(0.01 * len(data)))
+data['label'] = data[forecast_col].shift(-forecast_out)
 
-x_train = []
-y_train = []
+X = np.array(data.drop(['label'], 1))
+X = preprocessing.scale(X)
+X_lately = X[-forecast_out:]
+X = X[:-forecast_out]
+data.dropna(inplace=True)
+y = np.array(data['label'])
 
-for i in range(60, len(train_data)):
-    x_train.append(train_data[i-60:i, 0])
-    y_train.append(train_data[i, 0])
+# split dataset into train and test dataset
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+clf = LinearRegression(n_jobs=-1)
+clf.fit(X_train, y_train)
+confidence = clf.score(X_test, y_test)
 
-x_train, y_train = np.array(x_train), np.array(y_train)
-x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+# display the accuracy of forecast value.
+st.subheader('Accuracy:')
+st.write(confidence)
 
-model = Sequential()
-model.add(LSTM(50, return_sequences=True, input_shape=(x_train.shape[1], 1)))
-model.add(LSTM(50, return_sequences=False))
-model.add(Dense(25))
-model.add(Dense(1))
+forecast_set = clf.predict(X_lately)
+data['Forecast'] = np.nan
 
-model.compile(optimizer='adam', loss='mean_squared_error')
-model.fit(x_train, y_train, batch_size=1, epochs=1)
+last_date = data.iloc[-1].name
+last_unix = last_date.timestamp()
+one_day = 86400
+next_unix = last_unix + one_day
 
-data_test = df_import.filter(['Close'])
+for i in forecast_set:
+    next_date = datetime.datetime.fromtimestamp(next_unix)
+    next_unix += 86400
+    data.loc[next_date] = [np.nan for _ in range(len(data.columns)-1)]+[i]
+    last_date = data.iloc[-1].name
+    dti = pd.date_range(last_date, periods=forecast_out+1, freq='D')
+    index = 1
+for i in forecast_set:
+    data.loc[dti[index]] = [np.nan for _ in range(len(data.columns)-1)] + [i]
+    index +=1
 
-df2 = np.array(data_test).reshape(-1, 1)
-scaler = MinMaxScaler(feature_range=(0, 1))
-scaled_df2 = scaler.fit_transform(np.array(df2).reshape(-1, 1))
+# display the forecast value.
+st.subheader('Forecast value :-')
+st.dataframe(data.tail(50))
 
-test_data = scaled_df2[-60:, :].tolist()
-x_test = []
-y_test = []
-for i in range(60, 70):
-    x_test = (test_data[i-60:i])
-    x_test = np.asarray(x_test)
-    pred_data = model.predict(x_test.reshape(1, x_test.shape[0], 1).tolist())
-
-    y_test.append(pred_data[0][0])
-    test_data.append(pred_data)
-
-
-pred_next_10 = scaler.inverse_transform(np.asarray(y_test).reshape(-1, 1))
-
-data_load_state.text('Loading Model... done!')
-
-
-st.subheader("Next 10 Days")
-st.write(pred_next_10)
-
-
-# pred = current_data.extend(pred_next_10.tolist())
-
-
-# plt.figure(figsize=(16, 8))
-# plt.title('model')
-# plt.xlabel('Date', fontsize=18)
-# plt.ylabel('Close_Price', fontsize=18)
-# plt.plot(pred)
-# plt.legend(['train'], loc='lower right')
-# plt.show()
+# display the graph of adj close and forecast columns
+st.subheader('Graph of Adj Close and Forecast :-')
+st.line_chart(data[["Adj Close","Forecast"]])
