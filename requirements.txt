@@ -4,4 +4,3 @@ scikit-learn
 numpy
 pandas-datareader
 plotly
-math
