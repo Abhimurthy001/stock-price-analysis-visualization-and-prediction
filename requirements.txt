@@ -3,3 +3,4 @@ matplotlib
 scikit-learn
 tensorflow
 pandas
+pandas-datareader
