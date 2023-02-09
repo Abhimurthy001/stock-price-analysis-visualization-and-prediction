@@ -1,4 +1,3 @@
-# pip install streamlit fbprophet yfinance plotly
 import streamlit as st
 from datetime import date
 
@@ -13,7 +12,7 @@ TODAY = date.today().strftime("%Y-%m-%d")
 st.title('Stock Price Prediction App')
 
 stocks = ('HDFCBANK.NS', 'RELIANCE.NS', 'ICICIBANK.NS', 'TCS.NS','INFY.NS','SBIN.NS','ADANIPOWER.NS','ADANIPORTS.NS')
-selected_stock = st.selectbox('Select dataset for prediction', stocks)
+selected_stock = st.selectbox('Select company for prediction', stocks)
 
 n_years = st.slider('Years of prediction:', 1, 5)
 period = n_years * 365
@@ -56,7 +55,7 @@ forecast = m.predict(future)
 st.subheader('Forecast data')
 st.write(forecast.tail())
     
-st.write(f'Forecast plot for {n_years} years')
+st.write(f'Forecast plot for {n_years} years (view in light mode for better experiance')
 fig1 = plot_plotly(m, forecast)
 st.plotly_chart(fig1)
 
