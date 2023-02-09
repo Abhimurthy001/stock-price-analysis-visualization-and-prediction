@@ -2,12 +2,7 @@
 
 Streamlit Web App:
 
-https://github.com/Abhimurthy001/stock-price-analysis-visualization-and-prediction/blob/master/1.jpg
-https://github.com/Abhimurthy001/stock-price-analysis-visualization-and-prediction/blob/master/2.jpg
-https://github.com/Abhimurthy001/stock-price-analysis-visualization-and-prediction/blob/master/3.jpg
-https://github.com/Abhimurthy001/stock-price-analysis-visualization-and-prediction/blob/master/4.jpg
-https://github.com/Abhimurthy001/stock-price-analysis-visualization-and-prediction/blob/master/5.jpg
-https://github.com/Abhimurthy001/stock-price-analysis-visualization-and-prediction/blob/master/6.jpg
+https://github.com/Abhimurthy001/stock-price-analysis-visualization-and-prediction/blob/48d0629d34653ec414d592146797ed8d3ed56186/1.jpg
 
 
 ## Dependencies
