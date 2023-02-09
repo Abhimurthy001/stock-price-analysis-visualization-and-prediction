@@ -55,7 +55,7 @@ forecast = m.predict(future)
 st.subheader('Forecast data')
 st.write(forecast.tail())
     
-st.write(f'Forecast plot for {n_years} years (view in light mode for better experiance')
+st.write(f'Forecast plot for {n_years} years (view in light mode for better experiance)')
 fig1 = plot_plotly(m, forecast)
 st.plotly_chart(fig1)
 
