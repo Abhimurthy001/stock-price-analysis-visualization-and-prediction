@@ -1,5 +1,5 @@
 streamlit
 pystan==3.0.0
-fbprophet
+fbprophet==0.7.1
 yfinance
 plotly
