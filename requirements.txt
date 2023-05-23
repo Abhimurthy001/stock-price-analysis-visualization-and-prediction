@@ -1,5 +1,5 @@
 streamlit
-pystan==2.19.1.1
+pystan==3.0.0
 fbprophet
 yfinance
 plotly
