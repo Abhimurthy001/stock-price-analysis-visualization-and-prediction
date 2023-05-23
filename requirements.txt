@@ -1,5 +1,5 @@
-streamlit
+streamlit==0.82.0
 pystan==2.19.1.1
-fbprophet
-yfinance
-plotly
+fbprophet==0.9.0
+yfinance==0.1.59
+plotly==5.6.0
